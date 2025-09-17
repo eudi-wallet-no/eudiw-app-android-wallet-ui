@@ -60,7 +60,6 @@ android {
     defaultConfig {
         applicationId = "net.eidas2sandkasse.demolommebok"
         versionName = "1.0.0"
-        versionCode = 1
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -74,7 +73,7 @@ android {
             isMinifyEnabled = false
             applicationIdSuffix = AppBuildType.DEBUG.applicationIdSuffix
         }
-        release {
+        /*release {
             isDebuggable = false
             isMinifyEnabled = true
             isShrinkResources = true
