@@ -74,15 +74,17 @@ android {
             isMinifyEnabled = false
             applicationIdSuffix = AppBuildType.DEBUG.applicationIdSuffix
         }
-        /*release {
+        release {
             isDebuggable = false
-            isMinifyEnabled = true
-            applicationIdSuffix = AppBuildType.RELEASE.applicationIdSuffix
+            isMinifyEnabled = false
+            //applicationIdSuffix = AppBuildType.RELEASE.applicationIdSuffix
             signingConfig = signingConfigs.getByName("release")
+            /* 
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            */
         }
     }
 
