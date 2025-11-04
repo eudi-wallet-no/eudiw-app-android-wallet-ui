@@ -77,8 +77,7 @@ internal class WalletCoreConfigImpl : WalletCoreConfig {
                             listOf(
                                 BuildConfig.OPENID4VP_SCHEME,
                                 BuildConfig.EUDI_OPENID4VP_SCHEME,
-                                BuildConfig.MDOC_OPENID4VP_SCHEME,
-                                BuildConfig.HAIP_OPENID4VP_SCHEME
+                                BuildConfig.MDOC_OPENID4VP_SCHEME
                             )
                         )
                         withFormats(
