@@ -84,14 +84,14 @@ internal class WalletCoreConfigImpl(
                 .withClientAuthenticationType(OpenId4VciManager.ClientAuthenticationType.AttestationBased)
                 .withAuthFlowRedirectionURI(BuildConfig.ISSUE_AUTHORIZATION_DEEPLINK)
                 .withParUsage(OpenId4VciManager.Config.ParUsage.IF_SUPPORTED)
-                .withDPoPUsage(OpenId4VciManager.Config.DPoPUsage.Disabled)
+                .withDPoPUsage(OpenId4VciManager.Config.DPoPUsage.IfSupported())
                 .build(),
             OpenId4VciManager.Config.Builder()
                 .withIssuerUrl(issuerUrl = VCI_ISSUER_URL)
                 .withClientAuthenticationType(OpenId4VciManager.ClientAuthenticationType.AttestationBased)
                 .withAuthFlowRedirectionURI(BuildConfig.ISSUE_AUTHORIZATION_DEEPLINK)
                 .withParUsage(OpenId4VciManager.Config.ParUsage.IF_SUPPORTED)
-                .withDPoPUsage(OpenId4VciManager.Config.DPoPUsage.Disabled)
+                .withDPoPUsage(OpenId4VciManager.Config.DPoPUsage.IfSupported())
                 .build()
         )
 
