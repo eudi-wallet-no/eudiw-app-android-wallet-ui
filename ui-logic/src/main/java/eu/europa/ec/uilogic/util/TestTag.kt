@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 European Commission
+ * Copyright (c) 2025 European Commission
  *
  * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by the European
  * Commission - subsequent versions of the EUPL (the "Licence"); You may not use this work
@@ -14,11 +14,12 @@
  * governing permissions and limitations under the Licence.
  */
 
-package eu.europa.ec.networklogic.model.response
+package eu.europa.ec.uilogic.util
 
-import com.google.gson.annotations.SerializedName
+object TestTag {
 
-data class DummyResponse(
-    @SerializedName("id")
-    val clientId: String?
-)
+    fun pinTextField(index: Int) = "pin_text_field_$index"
+
+    fun buttonInBottomSheetWithTwoBigIcons(hostTab: String, index: Int) =
+        "${hostTab}_tab_bottom_sheet_button_${index}"
+}

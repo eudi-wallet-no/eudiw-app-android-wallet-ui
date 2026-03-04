@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 European Commission
+ * Copyright (c) 2025 European Commission
  *
  * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by the European
  * Commission - subsequent versions of the EUPL (the "Licence"); You may not use this work
@@ -14,11 +14,18 @@
  * governing permissions and limitations under the Licence.
  */
 
-package eu.europa.ec.networklogic.model.request
+package eu.europa.ec.issuancefeature.util
 
-import com.google.gson.annotations.SerializedName
+object TestTag {
 
-data class DummyRequest(
-    @SerializedName("id")
-    val clientId: String?
-)
+    object AddDocumentScreen {
+        const val SUBTITLE = "add_document_screen_subtitle"
+        fun optionItem(issuerId: String, configId: String) =
+            "add_document_screen_attestation_${issuerId}_$configId"
+    }
+
+    object DocumentOfferScreen {
+        const val CONTENT_HEADER_DESCRIPTION = "document_offer_screen_content_header_description"
+        const val BUTTON = "document_offer_screen_button"
+    }
+}

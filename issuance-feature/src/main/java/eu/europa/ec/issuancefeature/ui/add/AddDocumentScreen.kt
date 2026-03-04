@@ -57,6 +57,7 @@ import eu.europa.ec.commonfeature.config.IssuanceUiConfig
 import eu.europa.ec.corelogic.controller.IssuanceMethod
 import eu.europa.ec.corelogic.util.CoreActions
 import eu.europa.ec.issuancefeature.ui.add.model.AddDocumentUi
+import eu.europa.ec.issuancefeature.util.TestTag
 import eu.europa.ec.resourceslogic.R
 import eu.europa.ec.uilogic.component.AppIcons
 import eu.europa.ec.uilogic.component.ErrorInfo
@@ -81,6 +82,7 @@ import eu.europa.ec.uilogic.component.wrap.WrapButton
 import eu.europa.ec.uilogic.component.wrap.WrapImage
 import eu.europa.ec.uilogic.component.wrap.WrapListItem
 import eu.europa.ec.uilogic.component.wrap.WrapText
+import eu.europa.ec.uilogic.extension.applyTestTag
 import eu.europa.ec.uilogic.extension.finish
 import eu.europa.ec.uilogic.extension.getPendingDeepLink
 import eu.europa.ec.uilogic.extension.paddingFrom
@@ -231,7 +233,8 @@ private fun MainContent(
         ContentTitle(
             modifier = Modifier.fillMaxWidth(),
             title = state.title,
-            subtitle = state.subtitle
+            subtitle = state.subtitle,
+            subtitleTestTag = TestTag.AddDocumentScreen.SUBTITLE,
         )
 
         if (state.noOptions) {
@@ -293,10 +296,16 @@ private fun Options(
 
             itemsIndexed(
                 items = items,
-                key = { _, item -> "$issuerId-${item.itemData.itemId}" }
+                key = { _, item -> "$issuerId-${item.configurationId}" }
             ) { index, item ->
+                val testTag = TestTag.AddDocumentScreen.optionItem(
+                    issuerId = issuerId,
+                    configId = item.configurationId
+                )
                 WrapListItem(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .applyTestTag(testTag)
+                        .fillMaxWidth(),
                     item = item.itemData,
                     mainContentVerticalPadding = SPACING_LARGE.dp,
                     mainContentTextStyle = MaterialTheme.typography.titleMedium,
@@ -384,6 +393,7 @@ private fun IssuanceAddDocumentScreenPreview() {
                         listOf(
                             AddDocumentUi(
                                 credentialIssuerId = "issuer1",
+                                configurationId = "configId1",
                                 itemData = ListItemDataUi(
                                     itemId = "configId1",
                                     mainContentData = ListItemMainContentDataUi.Text(text = "National ID"),
@@ -399,6 +409,7 @@ private fun IssuanceAddDocumentScreenPreview() {
                         listOf(
                             AddDocumentUi(
                                 credentialIssuerId = "issuer2",
+                                configurationId = "configId2",
                                 itemData = ListItemDataUi(
                                     itemId = "configId2",
                                     mainContentData = ListItemMainContentDataUi.Text(text = "Driving Licence"),
@@ -441,6 +452,7 @@ private fun DashboardAddDocumentScreenPreview() {
                         listOf(
                             AddDocumentUi(
                                 credentialIssuerId = "issuer1",
+                                configurationId = "configId1",
                                 itemData = ListItemDataUi(
                                     itemId = "configId1",
                                     mainContentData = ListItemMainContentDataUi.Text(text = "National ID"),
@@ -456,6 +468,7 @@ private fun DashboardAddDocumentScreenPreview() {
                         listOf(
                             AddDocumentUi(
                                 credentialIssuerId = "issuer2",
+                                configurationId = "configId2",
                                 itemData = ListItemDataUi(
                                     itemId = "configId2",
                                     mainContentData = ListItemMainContentDataUi.Text(text = "Driving Licence"),

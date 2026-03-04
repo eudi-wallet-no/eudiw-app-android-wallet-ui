@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import eu.europa.ec.commonfeature.config.SuccessUIConfig
+import eu.europa.ec.commonfeature.util.TestTag
 import eu.europa.ec.resourceslogic.R
 import eu.europa.ec.resourceslogic.theme.values.ThemeColors
 import eu.europa.ec.resourceslogic.theme.values.success
@@ -57,6 +58,7 @@ import eu.europa.ec.uilogic.component.wrap.WrapButton
 import eu.europa.ec.uilogic.component.wrap.WrapImage
 import eu.europa.ec.uilogic.config.ConfigNavigation
 import eu.europa.ec.uilogic.config.NavigationType
+import eu.europa.ec.uilogic.extension.applyTestTag
 import eu.europa.ec.uilogic.extension.cacheDeepLink
 import eu.europa.ec.uilogic.navigation.StartupScreens
 import kotlinx.coroutines.channels.Channel
@@ -220,7 +222,9 @@ private fun Button(
                     type = ButtonType.PRIMARY,
                     onClick = { onEventSent(Event.ButtonClicked(config)) },
                 ),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .applyTestTag(TestTag.SuccessScreen.PRIMARY_BUTTON)
+                    .fillMaxWidth(),
             ) {
                 ButtonRow(text = config.text)
             }
@@ -232,7 +236,9 @@ private fun Button(
                     type = ButtonType.SECONDARY,
                     onClick = { onEventSent(Event.ButtonClicked(config)) },
                 ),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .applyTestTag(TestTag.SuccessScreen.SECONDARY_BUTTON)
+                    .fillMaxWidth(),
             ) {
                 ButtonRow(text = config.text)
             }

@@ -38,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import eu.europa.ec.commonfeature.config.OfferUiConfig
 import eu.europa.ec.corelogic.util.CoreActions
+import eu.europa.ec.issuancefeature.util.TestTag
 import eu.europa.ec.resourceslogic.R
 import eu.europa.ec.uilogic.component.ErrorInfo
 import eu.europa.ec.uilogic.component.ListItemDataUi
@@ -62,6 +63,7 @@ import eu.europa.ec.uilogic.component.wrap.WrapListItem
 import eu.europa.ec.uilogic.component.wrap.WrapStickyBottomContent
 import eu.europa.ec.uilogic.config.ConfigNavigation
 import eu.europa.ec.uilogic.config.NavigationType
+import eu.europa.ec.uilogic.extension.applyTestTag
 import eu.europa.ec.uilogic.extension.cacheDeepLink
 import eu.europa.ec.uilogic.extension.getPendingDeepLink
 import eu.europa.ec.uilogic.navigation.DashboardScreens
@@ -89,6 +91,7 @@ fun DocumentOfferScreen(
         stickyBottom = { paddingValues ->
             WrapStickyBottomContent(
                 modifier = Modifier
+                    .applyTestTag(TestTag.DocumentOfferScreen.BUTTON)
                     .fillMaxWidth()
                     .padding(paddingValues),
                 stickyBottomConfig = StickyBottomConfig(
@@ -163,6 +166,7 @@ private fun Content(
         ContentHeader(
             modifier = Modifier.fillMaxWidth(),
             config = state.headerConfig,
+            descriptionTestTag = TestTag.DocumentOfferScreen.CONTENT_HEADER_DESCRIPTION,
         )
 
         if (state.noDocument) {
@@ -271,7 +275,7 @@ private fun ContentPreview() {
                 )
             ),
             offerUiConfig = OfferUiConfig(
-                offerURI = "",
+                offerUri = "",
                 onSuccessNavigation = ConfigNavigation(
                     navigationType = NavigationType.PushScreen(
                         screen = DashboardScreens.Dashboard,

@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import eu.europa.ec.commonfeature.model.PinFlow
+import eu.europa.ec.commonfeature.util.TestTag
 import eu.europa.ec.resourceslogic.R
 import eu.europa.ec.uilogic.component.AppIconAndText
 import eu.europa.ec.uilogic.component.AppIconAndTextDataUi
@@ -61,6 +62,7 @@ import eu.europa.ec.uilogic.component.wrap.StickyBottomType
 import eu.europa.ec.uilogic.component.wrap.WrapModalBottomSheet
 import eu.europa.ec.uilogic.component.wrap.WrapPinTextField
 import eu.europa.ec.uilogic.component.wrap.WrapStickyBottomContent
+import eu.europa.ec.uilogic.extension.applyTestTag
 import eu.europa.ec.uilogic.extension.finish
 import eu.europa.ec.uilogic.navigation.CommonScreens
 import kotlinx.coroutines.CoroutineScope
@@ -94,6 +96,7 @@ fun PinScreen(
         stickyBottom = { paddingValues ->
             WrapStickyBottomContent(
                 modifier = Modifier
+                    .applyTestTag(TestTag.PinScreen.BUTTON)
                     .fillMaxWidth()
                     .padding(paddingValues),
                 stickyBottomConfig = StickyBottomConfig(
@@ -202,6 +205,7 @@ private fun Content(
         ) {
             Text(
                 text = state.title,
+                modifier = Modifier.applyTestTag(TestTag.PinScreen.TITLE),
                 style = MaterialTheme.typography.headlineMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -295,7 +299,7 @@ private fun PinScreenEmptyPreview() {
     PreviewTheme {
         Content(
             state = State(
-                pinFlow = PinFlow.CREATE,
+                pinFlow = PinFlow.CREATE_WITH_ACTIVATION,
                 pinState = PinValidationState.ENTER
             ),
             effectFlow = Channel<Effect>().receiveAsFlow(),

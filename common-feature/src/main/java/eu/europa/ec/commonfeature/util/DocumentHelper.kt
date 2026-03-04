@@ -27,9 +27,11 @@ import eu.europa.ec.corelogic.extension.removeEmptyGroups
 import eu.europa.ec.corelogic.extension.sortRecursivelyBy
 import eu.europa.ec.corelogic.model.ClaimDomain
 import eu.europa.ec.corelogic.model.ClaimPathDomain
+import eu.europa.ec.corelogic.model.ClaimType
 import eu.europa.ec.eudi.wallet.document.IssuedDocument
 import eu.europa.ec.eudi.wallet.document.NameSpace
 import eu.europa.ec.eudi.wallet.document.format.DocumentClaim
+import eu.europa.ec.eudi.wallet.document.format.MsoMdocClaim
 import eu.europa.ec.eudi.wallet.document.format.MsoMdocData
 import eu.europa.ec.eudi.wallet.document.format.SdJwtVcClaim
 import eu.europa.ec.eudi.wallet.document.format.SdJwtVcData
@@ -134,7 +136,7 @@ fun createKeyValue(
                 ClaimDomain.Group(
                     key = groupKey,
                     displayTitle = displayTitle,
-                    path = ClaimPathDomain(listOf(uuidProvider.provideUuid())),
+                    path = ClaimPathDomain(listOf(uuidProvider.provideUuid()), disclosurePath.type),
                     items = children
                 )
             )
@@ -187,10 +189,15 @@ fun createKeyValue(
 
         is Collection<*> -> {
 
-            val children: MutableList<ClaimDomain> = mutableListOf()
+            val groupedChildren: MutableList<ClaimDomain> = mutableListOf()
+            val isMultiElement = item.size > 1
+            val isRecordLevel = childKey.isEmpty()
 
-            item.forEach { value ->
+            item.forEachIndexed { index, value ->
                 value?.let {
+
+                    val entryChildren: MutableList<ClaimDomain> = mutableListOf()
+
                     createKeyValue(
                         item = it,
                         groupKey = groupKey,
@@ -198,14 +205,46 @@ fun createKeyValue(
                         resourceProvider = resourceProvider,
                         uuidProvider = uuidProvider,
                         claimMetaData = claimMetaData,
-                        allItems = children
+                        allItems = entryChildren
                     )
+
+                    val shouldCreateSubGroup = isMultiElement
+                            && isRecordLevel
+                            && entryChildren.size > 1
+                            && entryChildren.none { child ->
+                        child is ClaimDomain.Group && child.key == groupKey
+                    }
+
+                    if (shouldCreateSubGroup) {
+
+                        val position = index + 1
+
+                        groupedChildren.add(
+                            ClaimDomain.Group(
+                                key = "$groupKey-$position",
+                                displayTitle = "${
+                                    getReadableNameFromIdentifier(
+                                        claimMetaData = claimMetaData,
+                                        userLocale = resourceProvider.getLocale(),
+                                        fallback = groupKey
+                                    )
+                                } $position",
+                                path = ClaimPathDomain(
+                                    listOf(uuidProvider.provideUuid()),
+                                    disclosurePath.type
+                                ),
+                                items = entryChildren
+                            )
+                        )
+                    } else {
+                        groupedChildren.addAll(entryChildren)
+                    }
                 }
             }
 
             addFlatOrGroupedChildren(
                 allItems = allItems,
-                children = children,
+                children = groupedChildren,
                 groupKey = groupKey,
                 displayTitle = getReadableNameFromIdentifier(
                     claimMetaData = claimMetaData,
@@ -230,8 +269,10 @@ fun createKeyValue(
                 keyIsUserPseudonym(groupKey) -> item.toString().decodeFromBase64()
                 date != null -> date
                 item is Boolean -> resourceProvider.getString(
-                    if (item) R.string.document_details_boolean_item_true_readable_value
-                    else R.string.document_details_boolean_item_false_readable_value
+                    resId = if (item)
+                        R.string.document_details_boolean_item_true_readable_value
+                    else
+                        R.string.document_details_boolean_item_false_readable_value
                 )
 
                 else -> item.toString()
@@ -295,24 +336,55 @@ private fun insertPath(
 
     val key = path.value.first()
 
-    val existingNode = tree.find { it.key == key }
+    val existingNode = tree.find {
+        when (val type = disclosurePath.type) {
+            is ClaimType.MsoMdoc -> {
+                it.key == key && it.nameSpace == type.namespace
+            }
 
-    val currentClaim: DocumentClaim? = claims.find { it.identifier == key }
+            is ClaimType.SdJwtVc -> {
+                it.key == key
+            }
+
+            is ClaimType.Unknown -> {
+                false
+            }
+        }
+    }
+
+    val currentClaim: DocumentClaim? =
+        when (val type = disclosurePath.type) {
+            is ClaimType.MsoMdoc -> {
+                claims
+                    .filterIsInstance<MsoMdocClaim>()
+                    .find { it.identifier == key && it.nameSpace == type.namespace }
+            }
+
+            is ClaimType.SdJwtVc -> {
+                claims.find { it.identifier == key }
+            }
+
+            is ClaimType.Unknown -> null
+        }
 
     return if (path.value.size == 1) {
         // Leaf node (Primitive or Nested Structure)
         if (existingNode == null && currentClaim != null) {
-            val accumulatedClaims: MutableList<ClaimDomain> = mutableListOf()
-            createKeyValue(
-                item = currentClaim.value!!,
-                groupKey = currentClaim.identifier,
-                resourceProvider = resourceProvider,
-                uuidProvider = uuidProvider,
-                claimMetaData = currentClaim.issuerMetadata,
-                disclosurePath = disclosurePath,
-                allItems = accumulatedClaims,
-            )
-            tree + accumulatedClaims
+            currentClaim.value?.let { safeClaimValue ->
+                val accumulatedClaims: MutableList<ClaimDomain> = mutableListOf()
+
+                createKeyValue(
+                    item = safeClaimValue,
+                    groupKey = currentClaim.identifier,
+                    resourceProvider = resourceProvider,
+                    uuidProvider = uuidProvider,
+                    claimMetaData = currentClaim.issuerMetadata,
+                    disclosurePath = disclosurePath,
+                    allItems = accumulatedClaims,
+                )
+
+                tree + accumulatedClaims
+            } ?: tree // No value to add (claim value is null), return unchanged
         } else {
             tree // Already exists or not available, return unchanged
         }
@@ -325,7 +397,7 @@ private fun insertPath(
             existingNode.copy(
                 items = insertPath(
                     tree = existingNode.items,
-                    path = ClaimPathDomain(path.value.drop(1)),
+                    path = ClaimPathDomain(path.value.drop(1), path.type),
                     disclosurePath = disclosurePath,
                     claims = childClaims,
                     resourceProvider = resourceProvider,
@@ -341,10 +413,13 @@ private fun insertPath(
                     userLocale = userLocale,
                     fallback = currentClaim?.identifier ?: key
                 ),
-                path = ClaimPathDomain(disclosurePath.value.take((disclosurePath.value.size - path.value.size) + 1)),
+                path = ClaimPathDomain(
+                    disclosurePath.value.take((disclosurePath.value.size - path.value.size) + 1),
+                    path.type
+                ),
                 items = insertPath(
                     tree = emptyList(),
-                    path = ClaimPathDomain(path.value.drop(1)),
+                    path = ClaimPathDomain(path.value.drop(1), path.type),
                     disclosurePath = disclosurePath,
                     claims = childClaims,
                     resourceProvider = resourceProvider,
@@ -353,7 +428,22 @@ private fun insertPath(
             )
         }
 
-        tree.filter { it.key != key } + updatedNode // Replace or add the updated node
+        // Replace or add the updated node
+        tree.filter {
+            when (val type = disclosurePath.type) {
+                is ClaimType.MsoMdoc -> {
+                    it.key != key || it.nameSpace != type.namespace
+                }
+
+                is ClaimType.SdJwtVc -> {
+                    it.key != key
+                }
+
+                is ClaimType.Unknown -> {
+                    true
+                }
+            }
+        } + updatedNode
     }
 }
 

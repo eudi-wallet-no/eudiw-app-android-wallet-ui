@@ -60,8 +60,10 @@ import eu.europa.ec.corelogic.model.DocumentCategory
 import eu.europa.ec.corelogic.model.DocumentIdentifier
 import eu.europa.ec.corelogic.util.CoreActions
 import eu.europa.ec.dashboardfeature.model.SearchItemUi
+import eu.europa.ec.dashboardfeature.ui.component.BottomNavigationItem
 import eu.europa.ec.dashboardfeature.ui.documents.detail.model.DocumentIssuanceStateUi
 import eu.europa.ec.dashboardfeature.ui.documents.list.model.DocumentUi
+import eu.europa.ec.dashboardfeature.util.TestTag
 import eu.europa.ec.resourceslogic.R
 import eu.europa.ec.resourceslogic.theme.values.warning
 import eu.europa.ec.uilogic.component.AppIcons
@@ -99,6 +101,7 @@ import eu.europa.ec.uilogic.component.wrap.WrapExpandableListItem
 import eu.europa.ec.uilogic.component.wrap.WrapIconButton
 import eu.europa.ec.uilogic.component.wrap.WrapListItem
 import eu.europa.ec.uilogic.component.wrap.WrapModalBottomSheet
+import eu.europa.ec.uilogic.extension.applyTestTag
 import eu.europa.ec.uilogic.extension.finish
 import eu.europa.ec.uilogic.extension.paddingFrom
 import kotlinx.coroutines.CoroutineScope
@@ -229,7 +232,9 @@ private fun TopBar(
         )
 
         WrapIconButton(
-            modifier = Modifier.align(Alignment.CenterEnd),
+            modifier = Modifier
+                .applyTestTag(TestTag.DocumentsScreen.PLUS_BUTTON)
+                .align(Alignment.CenterEnd),
             iconData = AppIcons.Add,
             customTint = MaterialTheme.colorScheme.onSurfaceVariant,
         ) {
@@ -525,7 +530,8 @@ private fun DocumentsSheetContent(
                         event = Event.BottomSheet.AddDocument.ScanQr,
                     )
                 ),
-                onEventSent = onEventSent
+                onEventSent = onEventSent,
+                hostTab = BottomNavigationItem.Documents.route.lowercase(),
             )
         }
 

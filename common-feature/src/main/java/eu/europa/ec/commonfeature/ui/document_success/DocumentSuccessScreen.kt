@@ -36,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import eu.europa.ec.commonfeature.util.TestTag
 import eu.europa.ec.resourceslogic.R
 import eu.europa.ec.uilogic.component.content.ContentHeader
 import eu.europa.ec.uilogic.component.content.ContentScreen
@@ -49,6 +50,7 @@ import eu.europa.ec.uilogic.component.wrap.StickyBottomConfig
 import eu.europa.ec.uilogic.component.wrap.StickyBottomType
 import eu.europa.ec.uilogic.component.wrap.WrapExpandableListItem
 import eu.europa.ec.uilogic.component.wrap.WrapStickyBottomContent
+import eu.europa.ec.uilogic.extension.applyTestTag
 import eu.europa.ec.uilogic.extension.cacheDeepLink
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -67,6 +69,7 @@ fun DocumentSuccessScreen(
         stickyBottom = { paddingValues ->
             WrapStickyBottomContent(
                 modifier = Modifier
+                    .applyTestTag(TestTag.DocumentSuccessScreen.BUTTON)
                     .fillMaxWidth()
                     .padding(paddingValues),
                 stickyBottomConfig = StickyBottomConfig(
@@ -146,6 +149,7 @@ private fun Content(
         ContentHeader(
             modifier = Modifier.fillMaxWidth(),
             config = state.headerConfig,
+            descriptionTestTag = TestTag.DocumentSuccessScreen.CONTENT_HEADER_DESCRIPTION,
         )
 
         Column(
@@ -154,9 +158,11 @@ private fun Content(
                 .padding(vertical = SPACING_SMALL.dp),
             verticalArrangement = Arrangement.spacedBy(SPACING_MEDIUM.dp)
         ) {
-            state.items.forEach { successItem ->
+            state.items.forEachIndexed { index, successItem ->
                 WrapExpandableListItem(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .applyTestTag(TestTag.DocumentSuccessScreen.successDocument(index = index))
+                        .fillMaxWidth(),
                     header = successItem.header,
                     data = successItem.nestedItems,
                     onItemClick = null,

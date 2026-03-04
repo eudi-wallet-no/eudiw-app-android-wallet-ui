@@ -16,6 +16,7 @@
 
 package eu.europa.ec.dashboardfeature.interactor
 
+import eu.europa.ec.businesslogic.config.ConfigLogic
 import eu.europa.ec.businesslogic.extension.isBeyondNextDays
 import eu.europa.ec.businesslogic.extension.isExpired
 import eu.europa.ec.businesslogic.extension.isValid
@@ -169,6 +170,7 @@ class DocumentsInteractorImpl(
     private val resourceProvider: ResourceProvider,
     private val walletCoreDocumentsController: WalletCoreDocumentsController,
     private val filterValidator: FilterValidator,
+    private val configLogic: ConfigLogic
 ) : DocumentsInteractor {
 
     private val genericErrorMsg
@@ -305,6 +307,7 @@ class DocumentsInteractorImpl(
                                 document.localizedIssuerMetadata(userLocale)
 
                             val issuerName = localizedIssuerMetadata?.name
+                                ?: resourceProvider.getString(R.string.documents_screen_filters_unknown_issuer)
 
                             val documentIdentifier = document.toDocumentIdentifier()
 
@@ -316,7 +319,7 @@ class DocumentsInteractorImpl(
 
                             val documentSearchTags = buildList {
                                 add(documentName)
-                                if (!issuerName.isNullOrBlank()) {
+                                if (issuerName.isNotBlank()) {
                                     add(issuerName)
                                 }
                             }
@@ -416,6 +419,7 @@ class DocumentsInteractorImpl(
                                 document.localizedIssuerMetadata(userLocale)
 
                             val issuerName = localizedIssuerMetadata?.name
+                                ?: resourceProvider.getString(R.string.documents_screen_filters_unknown_issuer)
 
                             val documentIdentifier = document.toDocumentIdentifier()
 
@@ -427,7 +431,7 @@ class DocumentsInteractorImpl(
 
                             val documentSearchTags = buildList {
                                 add(documentName)
-                                if (!issuerName.isNullOrBlank()) {
+                                if (issuerName.isNotBlank()) {
                                     add(issuerName)
                                 }
                             }
@@ -583,7 +587,9 @@ class DocumentsInteractorImpl(
                     }
 
                     is DeleteDocumentPartialState.Success -> {
-                        if (walletCoreDocumentsController.getAllDocuments().isEmpty()) {
+                        if (configLogic.forcePidActivation
+                            && walletCoreDocumentsController.getAllDocuments().isEmpty()
+                        ) {
                             emit(DocumentInteractorDeleteDocumentPartialState.AllDocumentsDeleted)
                         } else
                             emit(DocumentInteractorDeleteDocumentPartialState.SingleDocumentDeleted)
@@ -791,18 +797,14 @@ class DocumentsInteractorImpl(
     private fun addIssuerFilter(documents: FilterableList): List<FilterItem> {
         return documents.items
             .distinctBy { (it.attributes as DocumentsFilterableAttributes).issuer }
-            .mapNotNull { filterableItem ->
+            .map { filterableItem ->
                 with(filterableItem.attributes as DocumentsFilterableAttributes) {
-                    if (issuer != null) {
-                        FilterItem(
-                            id = issuer,
-                            name = issuer,
-                            selected = true,
-                            isDefault = true,
-                        )
-                    } else {
-                        null
-                    }
+                    FilterItem(
+                        id = issuer,
+                        name = issuer,
+                        selected = true,
+                        isDefault = true,
+                    )
                 }
             }
     }

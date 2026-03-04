@@ -42,6 +42,7 @@ import androidx.navigation.NavController
 import eu.europa.ec.commonfeature.config.BiometricMode
 import eu.europa.ec.commonfeature.config.BiometricUiConfig
 import eu.europa.ec.commonfeature.config.OnBackNavigationConfig
+import eu.europa.ec.commonfeature.util.TestTag
 import eu.europa.ec.resourceslogic.R
 import eu.europa.ec.uilogic.component.AppIconAndText
 import eu.europa.ec.uilogic.component.AppIconAndTextDataUi
@@ -62,6 +63,7 @@ import eu.europa.ec.uilogic.component.wrap.WrapPinTextField
 import eu.europa.ec.uilogic.config.ConfigNavigation
 import eu.europa.ec.uilogic.config.FlowCompletion
 import eu.europa.ec.uilogic.config.NavigationType
+import eu.europa.ec.uilogic.extension.applyTestTag
 import eu.europa.ec.uilogic.extension.cacheDeepLink
 import eu.europa.ec.uilogic.extension.finish
 import eu.europa.ec.uilogic.extension.paddingFrom
@@ -267,6 +269,7 @@ private fun MainContent(
             ) {
                 Text(
                     modifier = Modifier
+                        .applyTestTag(TestTag.BiometricScreen.PIN_TEXT)
                         .fillMaxWidth()
                         .padding(vertical = SPACING_SMALL.dp),
                     text = mode.textAbovePin,
@@ -301,6 +304,7 @@ private fun MainContent(
             ) {
                 Text(
                     text = mode.title,
+                    modifier = Modifier.applyTestTag(TestTag.BiometricScreen.PIN_TITLE),
                     style = MaterialTheme.typography.headlineMedium.copy(
                         color = MaterialTheme.colorScheme.onSurface
                     )

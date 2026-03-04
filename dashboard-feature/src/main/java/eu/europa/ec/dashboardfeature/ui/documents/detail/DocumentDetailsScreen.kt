@@ -61,6 +61,7 @@ import eu.europa.ec.corelogic.util.CoreActions
 import eu.europa.ec.dashboardfeature.ui.documents.detail.model.DocumentDetailsUi
 import eu.europa.ec.dashboardfeature.ui.documents.detail.model.DocumentIssuanceStateUi
 import eu.europa.ec.dashboardfeature.ui.documents.model.DocumentCredentialsInfoUi
+import eu.europa.ec.dashboardfeature.util.TestTag
 import eu.europa.ec.resourceslogic.R
 import eu.europa.ec.resourceslogic.theme.values.success
 import eu.europa.ec.resourceslogic.theme.values.warning
@@ -96,6 +97,7 @@ import eu.europa.ec.uilogic.component.wrap.WrapCard
 import eu.europa.ec.uilogic.component.wrap.WrapListItems
 import eu.europa.ec.uilogic.component.wrap.WrapModalBottomSheet
 import eu.europa.ec.uilogic.component.wrap.WrapText
+import eu.europa.ec.uilogic.extension.applyTestTag
 import eu.europa.ec.uilogic.extension.clickableNoRipple
 import eu.europa.ec.uilogic.extension.paddingFrom
 import kotlinx.coroutines.CoroutineScope
@@ -377,7 +379,9 @@ private fun SheetContent(
                 leadingIcon = AppIcons.Delete,
                 leadingIconTint = MaterialTheme.colorScheme.error,
                 onPositiveClick = { onEventSent(Event.BottomSheet.Delete.PrimaryButtonPressed) },
-                onNegativeClick = { onEventSent(Event.BottomSheet.Delete.SecondaryButtonPressed) }
+                positiveButtonTestTag = TestTag.DocumentDetailsScreen.BOTTOM_SHEET_DELETE_DOCUMENT_POSITIVE_BUTTON,
+                onNegativeClick = { onEventSent(Event.BottomSheet.Delete.SecondaryButtonPressed) },
+                negativeButtonTestTag = TestTag.DocumentDetailsScreen.BOTTOM_SHEET_DELETE_DOCUMENT_NEGATIVE_BUTTON,
             )
 
         is DocumentDetailsBottomSheetContent.BookmarkStoredInfo -> {
@@ -649,7 +653,9 @@ private fun ButtonsSection(onEventSend: (Event) -> Unit) {
             .navigationBarsPadding()
     ) {
         WrapButton(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .applyTestTag(TestTag.DocumentDetailsScreen.DELETE_BUTTON)
+                .fillMaxWidth(),
             buttonConfig = ButtonConfig(
                 type = ButtonType.SECONDARY,
                 onClick = { onEventSend(Event.SecondaryButtonPressed) },
