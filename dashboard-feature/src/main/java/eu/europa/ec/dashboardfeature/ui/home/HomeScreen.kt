@@ -313,8 +313,6 @@ private fun HomeScreenSheetContent(
                     onEventSent(event)
                 }
             )
-
-            onEventSent(Event.BottomSheet.Authenticate.OpenAuthenticateOnLine)
         }
 
         is HomeScreenBottomSheetContent.Sign -> {
