@@ -47,20 +47,6 @@ internal class WalletCoreConfigImpl : WalletCoreConfig {
         const val AUTHENTICATION_REQUIRED = false
     }
 
-    private companion object {
-        const val VCI_ISSUER_URL = "https://utsteder.eidas2sandkasse.dev"
-//        const val VCI_ISSUER_URL = "http://issuer-server:9240"
-        const val VCI_CLIENT_ID = "wallet-dev"
-        const val AUTHENTICATION_REQUIRED = false
-    }
-
-    private companion object {
-        const val VCI_ISSUER_URL = "https://utsteder.eidas2sandkasse.dev/pid"
-//        const val VCI_ISSUER_URL = "http://issuer-server:9240"
-        const val VCI_CLIENT_ID = "wallet-dev"
-        const val AUTHENTICATION_REQUIRED = false
-    }
-
     private var _config: EudiWalletConfig? = null
 
     override val config: EudiWalletConfig
