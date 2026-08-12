@@ -137,11 +137,11 @@ internal class WalletCoreConfigImpl : WalletCoreConfig {
     override val issuersConfig: List<VciConfig>
         get() = listOf(
             VciConfig(
-                issuerUrl = "https://issuer.eudiw.dev",
+                issuerUrl = VCI_ISSUER_URL,
                 config = OpenId4VciManager.Config.Builder()
                     .withClientAuthenticationType(
                         OpenId4VciManager.ClientAuthenticationType.AttestationBased(
-                            clientId = "eudiw-abca"
+                            clientId = VCI_CLIENT_ID
                         )
                     )
                     .withAuthFlowRedirectionURI(BuildConfig.ISSUE_AUTHORIZATION_DEEPLINK)
@@ -160,11 +160,11 @@ internal class WalletCoreConfigImpl : WalletCoreConfig {
                 order = 0
             ),
             VciConfig(
-                issuerUrl = "https://issuer-backend.eudiw.dev",
+                issuerUrl = VCI_ISSUER_URL,
                 config = OpenId4VciManager.Config.Builder()
                     .withClientAuthenticationType(
                         OpenId4VciManager.ClientAuthenticationType.AttestationBased(
-                            clientId = "eudiw-abca"
+                            clientId = VCI_CLIENT_ID
                         )
                     )
                     .withAuthFlowRedirectionURI(BuildConfig.ISSUE_AUTHORIZATION_DEEPLINK)
