@@ -88,9 +88,9 @@ internal class WalletCoreConfigImpl : WalletCoreConfig {
                     configureEtsiTrust {
                         loteLocations(
                             SupportedLists(
-                                pidProviders = Uri("https://trustedlist.serviceproviders.eudiw.dev/LOTE/json/PIDProviders.jwt"),
-                                wrpacProviders = Uri("https://trustedlist.serviceproviders.eudiw.dev/LOTE/json/WRPACProviders.jwt"),
-                                pubEaaProviders = Uri("https://trustedlist.serviceproviders.eudiw.dev/LOTE/json/PubEAAProviders.jwt"),
+                                pidProviders = Uri("https://tillitsliste.test.eidas2sandkasse.net/no_eidas2sandkasse_test_pid"),
+                                wrpacProviders = Uri("https://tillitsliste.test.eidas2sandkasse.net/no_eidas2sandkasse_test_wallet"),
+                                pubEaaProviders = Uri("https://tillitsliste.test.eidas2sandkasse.net/no_eidas2sandkasse_test_aca"),
                             )
                         )
 
@@ -179,6 +179,13 @@ internal class WalletCoreConfigImpl : WalletCoreConfig {
                             )
                         )
                     )
+                    .withResponseEncryptionConfig(
+                        EncryptionSupportConfig(
+                            credentialResponseEncryptionPolicy = CredentialResponseEncryptionPolicy.SUPPORTED,
+                            ecConfig = EcConfig(ecKeyCurve = Curve.P_256),
+                            rsaConfig = RsaConfig(rcaKeySize = 2048),
+                        )
+                    )
                     .build(),
                 order = 1
             )
@@ -206,5 +213,5 @@ internal class WalletCoreConfigImpl : WalletCoreConfig {
         )
 
     override val walletProviderHost: String
-        get() = "https://dev.wallet-provider.eudiw.dev"
+        get() = "https://utsteder.test.eidas2sandkasse.net"
 }
