@@ -100,7 +100,7 @@ internal class WalletCoreConfigImpl(
                         )
                     }
 
-                    /*
+
                     configureEtsiTrust {
                         loteLocations(
                             SupportedLists(
@@ -149,8 +149,6 @@ internal class WalletCoreConfigImpl(
                             }
                         }
                     }
-                    */
-
 
                     // The sandbox issuers' signed metadata carries no issuer_info/registration certificate (WRPRC),
                     // and there is no WRPRC trust list yet, so registration certificate validation would always fail.
