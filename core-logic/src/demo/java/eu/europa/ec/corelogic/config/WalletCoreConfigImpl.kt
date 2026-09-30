@@ -16,6 +16,7 @@
 
 package eu.europa.ec.corelogic.config
 
+import com.nimbusds.jose.jwk.Curve
 import eu.europa.ec.corelogic.BuildConfig
 import eu.europa.ec.corelogic.model.DocumentIdentifier
 import eu.europa.ec.corelogic.provider.RegistrationCheckProvider
@@ -25,8 +26,12 @@ import eu.europa.ec.eudi.etsi1196x2.consultation.AttestationIdentifier
 import eu.europa.ec.eudi.etsi1196x2.consultation.AttestationIdentifierPredicate
 import eu.europa.ec.eudi.etsi1196x2.consultation.SupportedLists
 import eu.europa.ec.eudi.iso18013.transfer.response.ReaderAuthPolicy
+import eu.europa.ec.eudi.openid4vci.CredentialResponseEncryptionPolicy
 import eu.europa.ec.eudi.openid4vci.CredentialReusePolicies
+import eu.europa.ec.eudi.openid4vci.EcConfig
+import eu.europa.ec.eudi.openid4vci.EncryptionSupportConfig
 import eu.europa.ec.eudi.openid4vci.EudiReusePolicyType
+import eu.europa.ec.eudi.openid4vci.RsaConfig
 import eu.europa.ec.eudi.wallet.EudiWalletConfig
 import eu.europa.ec.eudi.wallet.dcapi.DCAPIProtocol
 import eu.europa.ec.eudi.wallet.document.CreateDocumentSettings.CredentialPolicy
@@ -211,13 +216,11 @@ internal class WalletCoreConfigImpl(
                 reissueTriggerLifetimeLeft = 24.hours
             ),
             documentSpecificPolicies = mapOf(
-                DocumentIdentifier.MdocPid to CredentialPolicy.OnceOnly(
-                    numberOfCredentials = 10,
-                    reissueTriggerUnused = 2
+                DocumentIdentifier.MdocPid to CredentialPolicy.RotatingBatch(
+                    numberOfCredentials = 1
                 ),
-                DocumentIdentifier.SdJwtPid to CredentialPolicy.OnceOnly(
-                    numberOfCredentials = 10,
-                    reissueTriggerUnused = 2
+                DocumentIdentifier.SdJwtPid to CredentialPolicy.RotatingBatch(
+                    numberOfCredentials = 1
                 ),
             ),
             reissuanceRule = ReIssuanceRule(

@@ -92,10 +92,9 @@ internal class WalletCoreConfigImpl(
                     configureEtsiTrust {
                         loteLocations(
                             SupportedLists(
-                                pidProviders = Uri("https://trustedlist.serviceproviders.eudiw.dev/LOTE/json/PIDProviders.jwt"),
-                                wrpacProviders = Uri("https://trustedlist.serviceproviders.eudiw.dev/LOTE/json/WRPACProviders.jwt"),
-                                wrprcProviders = Uri("https://trustedlist.serviceproviders.eudiw.dev/LOTE/json/WRPRCProviders.jwt"),
-                                pubEaaProviders = Uri("https://trustedlist.serviceproviders.eudiw.dev/LOTE/json/PubEAAProviders.jwt"),
+                                pidProviders = Uri("https://tillitsliste.eidas2sandkasse.dev/no_eidas2sandkasse_dev_pid.jws"),
+                                walletProviders = Uri("https://tillitsliste.eidas2sandkasse.dev/no_eidas2sandkasse_dev_wallet.jws"),
+                                wrpacProviders = Uri("https://tillitsliste.eidas2sandkasse.dev/no_eidas2sandkasse_dev_aca.jws"),
                             )
                         )
 
@@ -137,6 +136,14 @@ internal class WalletCoreConfigImpl(
                             }
                         }
                     }
+
+                    // The sandbox issuers' signed metadata carries no issuer_info/registration certificate (WRPRC),
+                    // and there is no WRPRC trust list yet, so registration certificate validation would always fail.
+                    configureIssuerRegistrationPolicy(IssuerRegistrationPolicy.Disabled)
+
+                    // Same for verifiers: sandbox requests carry no verifier_info registration certificate, and
+                    // openid4vp-kt rejects x509_hash requests without one (MissingRequiredRegistrationCertificate).
+                    configureWrpRegistrationPolicy(WrpRegistrationPolicy.Disabled)
 
                     configureReaderTrustStore {
                         readerAuthPolicy(ReaderAuthPolicy.EnforceIfPresent)

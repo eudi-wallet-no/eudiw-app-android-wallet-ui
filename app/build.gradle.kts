@@ -40,8 +40,9 @@ android {
     }
 
     defaultConfig {
-        applicationId = "eu.europa.ec.euidi"
-        versionCode = 1
+        applicationId = "net.eidas2sandkasse.demolommebok"
+        versionName = "1.1.0"
+        versionCode = 15
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -57,9 +58,8 @@ android {
         }
         release {
             isDebuggable = false
-            isMinifyEnabled = true
-            isShrinkResources = true
-            applicationIdSuffix = AppBuildType.RELEASE.applicationIdSuffix
+            isMinifyEnabled = false
+            //applicationIdSuffix = AppBuildType.RELEASE.applicationIdSuffix
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
