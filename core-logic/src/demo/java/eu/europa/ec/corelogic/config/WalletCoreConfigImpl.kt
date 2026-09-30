@@ -103,9 +103,9 @@ internal class WalletCoreConfigImpl(
                     configureEtsiTrust {
                         loteLocations(
                             SupportedLists(
-                                pidProviders = Uri("https://tillitsliste.test.eidas2sandkasse.net/no_eidas2sandkasse_test_pid"),
-                                wrpacProviders = Uri("https://tillitsliste.test.eidas2sandkasse.net/no_eidas2sandkasse_test_wallet"),
-                                pubEaaProviders = Uri("https://tillitsliste.test.eidas2sandkasse.net/no_eidas2sandkasse_test_aca"),
+                                pidProviders = Uri("https://tillitsliste.test.eidas2sandkasse.net/no_eidas2sandkasse_test_pid.jws"),
+                                walletProviders = Uri("https://tillitsliste.test.eidas2sandkasse.net/no_eidas2sandkasse_test_wallet.jws"),
+                                wrpacProviders = Uri("https://tillitsliste.test.eidas2sandkasse.net/no_eidas2sandkasse_test_aca.jws"),
                             )
                         )
 
@@ -148,8 +148,16 @@ internal class WalletCoreConfigImpl(
                         }
                     }
 
+                    // The sandbox issuers' signed metadata carries no issuer_info/registration certificate (WRPRC),
+                    // and there is no WRPRC trust list yet, so registration certificate validation would always fail.
+                    configureIssuerRegistrationPolicy(IssuerRegistrationPolicy.Disabled)
+
+                    // Same for verifiers: sandbox requests carry no verifier_info registration certificate, and
+                    // openid4vp-kt rejects x509_hash requests without one (MissingRequiredRegistrationCertificate).
+                    configureWrpRegistrationPolicy(WrpRegistrationPolicy.Disabled)
+
                     configureReaderTrustStore {
-                        readerAuthPolicy(ReaderAuthPolicy.EnforceIfPresent)
+                        //readerAuthPolicy(ReaderAuthPolicy.EnforceIfPresent)
                     }
 
                     configureWrpRegistrationPolicy(
