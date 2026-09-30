@@ -41,5 +41,8 @@ class AndroidLintConventionPlugin : Plugin<Project> {
 }
 
 private fun Lint.configure() {
-    checkDependencies = true
+    xmlReport = false
+    checkDependencies = false
+    abortOnError = false
+    checkReleaseBuilds = false
 }

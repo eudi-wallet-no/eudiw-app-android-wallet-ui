@@ -16,6 +16,7 @@
 
 package eu.europa.ec.corelogic.config
 
+import com.nimbusds.jose.jwk.Curve
 import eu.europa.ec.corelogic.BuildConfig
 import eu.europa.ec.corelogic.model.DocumentIdentifier
 import eu.europa.ec.corelogic.provider.RegistrationCheckProvider
@@ -25,8 +26,12 @@ import eu.europa.ec.eudi.etsi1196x2.consultation.AttestationIdentifier
 import eu.europa.ec.eudi.etsi1196x2.consultation.AttestationIdentifierPredicate
 import eu.europa.ec.eudi.etsi1196x2.consultation.SupportedLists
 import eu.europa.ec.eudi.iso18013.transfer.response.ReaderAuthPolicy
+import eu.europa.ec.eudi.openid4vci.CredentialResponseEncryptionPolicy
 import eu.europa.ec.eudi.openid4vci.CredentialReusePolicies
+import eu.europa.ec.eudi.openid4vci.EcConfig
+import eu.europa.ec.eudi.openid4vci.EncryptionSupportConfig
 import eu.europa.ec.eudi.openid4vci.EudiReusePolicyType
+import eu.europa.ec.eudi.openid4vci.RsaConfig
 import eu.europa.ec.eudi.wallet.EudiWalletConfig
 import eu.europa.ec.eudi.wallet.dcapi.DCAPIProtocol
 import eu.europa.ec.eudi.wallet.document.CreateDocumentSettings.CredentialPolicy
@@ -45,6 +50,12 @@ import kotlin.time.Duration.Companion.seconds
 internal class WalletCoreConfigImpl(
     private val registrationCheckProvider: RegistrationCheckProvider,
 ) : WalletCoreConfig {
+
+    private companion object {
+        const val VCI_ISSUER_URL = "https://utsteder.eidas2sandkasse.dev/pid"
+        const val VCI_CLIENT_ID = "wallet-dev"
+        const val AUTHENTICATION_REQUIRED = false
+    }
 
     private var _config: EudiWalletConfig? = null
 
@@ -89,6 +100,7 @@ internal class WalletCoreConfigImpl(
                         )
                     }
 
+                    /*
                     configureEtsiTrust {
                         loteLocations(
                             SupportedLists(
@@ -117,6 +129,7 @@ internal class WalletCoreConfigImpl(
                         relaxPkixRevocation()
                     }
 
+
                     configureIssuerTrust {
                         policy { default(TrustPolicy.Action.ENFORCE) }
                         requireSignedMetadata()
@@ -136,6 +149,8 @@ internal class WalletCoreConfigImpl(
                             }
                         }
                     }
+                    */
+
 
                     // The sandbox issuers' signed metadata carries no issuer_info/registration certificate (WRPRC),
                     // and there is no WRPRC trust list yet, so registration certificate validation would always fail.
@@ -146,7 +161,7 @@ internal class WalletCoreConfigImpl(
                     configureWrpRegistrationPolicy(WrpRegistrationPolicy.Disabled)
 
                     configureReaderTrustStore {
-                        readerAuthPolicy(ReaderAuthPolicy.EnforceIfPresent)
+                        //readerAuthPolicy(ReaderAuthPolicy.EnforceIfPresent)
                     }
 
                     configureWrpRegistrationPolicy(
@@ -164,12 +179,10 @@ internal class WalletCoreConfigImpl(
     override val issuersConfig: List<VciConfig>
         get() = listOf(
             VciConfig(
-                issuerUrl = "https://ec.dev.issuer.eudiw.dev",
+                issuerUrl = VCI_ISSUER_URL,
                 config = OpenId4VciManager.Config.Builder()
                     .withClientAuthenticationType(
-                        OpenId4VciManager.ClientAuthenticationType.AttestationBased(
-                            clientId = "eudiw-abca"
-                        )
+                        OpenId4VciManager.ClientAuthenticationType.None(VCI_CLIENT_ID)
                     )
                     .withAuthFlowRedirectionURI(BuildConfig.ISSUE_AUTHORIZATION_DEEPLINK)
                     .withParUsage(OpenId4VciManager.Config.ParUsage.IF_SUPPORTED)
@@ -181,18 +194,23 @@ internal class WalletCoreConfigImpl(
                                 EudiReusePolicyType.OnceOnly,
                                 EudiReusePolicyType.LimitedTime,
                             )
+                        )
+                    )
+                    .withResponseEncryptionConfig(
+                        EncryptionSupportConfig(
+                            credentialResponseEncryptionPolicy = CredentialResponseEncryptionPolicy.SUPPORTED,
+                            ecConfig = EcConfig(ecKeyCurve = Curve.P_256),
+                            rsaConfig = RsaConfig(rcaKeySize = 2048),
                         )
                     )
                     .build(),
                 order = 0
             ),
             VciConfig(
-                issuerUrl = "https://dev.issuer-backend.eudiw.dev",
+                issuerUrl = VCI_ISSUER_URL,
                 config = OpenId4VciManager.Config.Builder()
                     .withClientAuthenticationType(
-                        OpenId4VciManager.ClientAuthenticationType.AttestationBased(
-                            clientId = "eudiw-abca"
-                        )
+                        OpenId4VciManager.ClientAuthenticationType.None(VCI_CLIENT_ID)
                     )
                     .withAuthFlowRedirectionURI(BuildConfig.ISSUE_AUTHORIZATION_DEEPLINK)
                     .withParUsage(OpenId4VciManager.Config.ParUsage.IF_SUPPORTED)
@@ -204,6 +222,13 @@ internal class WalletCoreConfigImpl(
                                 EudiReusePolicyType.OnceOnly,
                                 EudiReusePolicyType.LimitedTime,
                             )
+                        )
+                    )
+                    .withResponseEncryptionConfig(
+                        EncryptionSupportConfig(
+                            credentialResponseEncryptionPolicy = CredentialResponseEncryptionPolicy.SUPPORTED,
+                            ecConfig = EcConfig(ecKeyCurve = Curve.P_256),
+                            rsaConfig = RsaConfig(rcaKeySize = 2048),
                         )
                     )
                     .build(),
@@ -218,13 +243,11 @@ internal class WalletCoreConfigImpl(
                 reissueTriggerLifetimeLeft = 24.hours
             ),
             documentSpecificPolicies = mapOf(
-                DocumentIdentifier.MdocPid to CredentialPolicy.OnceOnly(
-                    numberOfCredentials = 60,
-                    reissueTriggerUnused = 2
+                DocumentIdentifier.MdocPid to CredentialPolicy.RotatingBatch(
+                    numberOfCredentials = 1
                 ),
-                DocumentIdentifier.SdJwtPid to CredentialPolicy.OnceOnly(
-                    numberOfCredentials = 60,
-                    reissueTriggerUnused = 2
+                DocumentIdentifier.SdJwtPid to CredentialPolicy.RotatingBatch(
+                    numberOfCredentials = 1
                 ),
             ),
             reissuanceRule = ReIssuanceRule(

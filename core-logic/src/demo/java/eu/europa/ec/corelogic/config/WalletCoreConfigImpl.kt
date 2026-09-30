@@ -51,6 +51,12 @@ internal class WalletCoreConfigImpl(
     private val registrationCheckProvider: RegistrationCheckProvider,
 ) : WalletCoreConfig {
 
+    private companion object {
+        const val VCI_ISSUER_URL = "https://utsteder.test.eidas2sandkasse.net/pid"
+        const val VCI_CLIENT_ID = "wallet-dev"
+        const val AUTHENTICATION_REQUIRED = false
+    }
+
     private var _config: EudiWalletConfig? = null
 
     override val isRegistrationCheckEnabled: Boolean by lazy {
@@ -97,10 +103,9 @@ internal class WalletCoreConfigImpl(
                     configureEtsiTrust {
                         loteLocations(
                             SupportedLists(
-                                pidProviders = Uri("https://trustedlist.serviceproviders.eudiw.dev/LOTE/json/PIDProviders.jwt"),
-                                wrpacProviders = Uri("https://trustedlist.serviceproviders.eudiw.dev/LOTE/json/WRPACProviders.jwt"),
-                                wrprcProviders = Uri("https://trustedlist.serviceproviders.eudiw.dev/LOTE/json/WRPRCProviders.jwt"),
-                                pubEaaProviders = Uri("https://trustedlist.serviceproviders.eudiw.dev/LOTE/json/PubEAAProviders.jwt"),
+                                pidProviders = Uri("https://tillitsliste.test.eidas2sandkasse.net/no_eidas2sandkasse_test_pid"),
+                                wrpacProviders = Uri("https://tillitsliste.test.eidas2sandkasse.net/no_eidas2sandkasse_test_wallet"),
+                                pubEaaProviders = Uri("https://tillitsliste.test.eidas2sandkasse.net/no_eidas2sandkasse_test_aca"),
                             )
                         )
 
@@ -162,11 +167,11 @@ internal class WalletCoreConfigImpl(
     override val issuersConfig: List<VciConfig>
         get() = listOf(
             VciConfig(
-                issuerUrl = "https://issuer.eudiw.dev",
+                issuerUrl = VCI_ISSUER_URL,
                 config = OpenId4VciManager.Config.Builder()
                     .withClientAuthenticationType(
                         OpenId4VciManager.ClientAuthenticationType.AttestationBased(
-                            clientId = "eudiw-abca"
+                            clientId = VCI_CLIENT_ID
                         )
                     )
                     .withAuthFlowRedirectionURI(BuildConfig.ISSUE_AUTHORIZATION_DEEPLINK)
@@ -185,11 +190,11 @@ internal class WalletCoreConfigImpl(
                 order = 0
             ),
             VciConfig(
-                issuerUrl = "https://issuer-backend.eudiw.dev",
+                issuerUrl = VCI_ISSUER_URL,
                 config = OpenId4VciManager.Config.Builder()
                     .withClientAuthenticationType(
                         OpenId4VciManager.ClientAuthenticationType.AttestationBased(
-                            clientId = "eudiw-abca"
+                            clientId = VCI_CLIENT_ID
                         )
                     )
                     .withAuthFlowRedirectionURI(BuildConfig.ISSUE_AUTHORIZATION_DEEPLINK)
@@ -202,6 +207,13 @@ internal class WalletCoreConfigImpl(
                                 EudiReusePolicyType.OnceOnly,
                                 EudiReusePolicyType.LimitedTime,
                             )
+                        )
+                    )
+                    .withResponseEncryptionConfig(
+                        EncryptionSupportConfig(
+                            credentialResponseEncryptionPolicy = CredentialResponseEncryptionPolicy.SUPPORTED,
+                            ecConfig = EcConfig(ecKeyCurve = Curve.P_256),
+                            rsaConfig = RsaConfig(rcaKeySize = 2048),
                         )
                     )
                     .build(),
@@ -229,5 +241,5 @@ internal class WalletCoreConfigImpl(
         )
 
     override val walletProviderHost: String
-        get() = "https://wallet-provider.eudiw.dev"
+        get() = "https://utsteder.test.eidas2sandkasse.net"
 }
