@@ -55,11 +55,19 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             val haipOpenId4VpScheme = "haip-vp"
             val haipOpenid4VpHost = "*"
 
+            // ETSI TS 119 472-2 OIDFVP-HAIP-REDIRECTS-03
+            val etsiOpenId4VpScheme = "eu-eaap"
+            val etsiOpenid4VpHost = "*"
+
             val credentialOfferScheme = "openid-credential-offer"
             val credentialOfferHost = "*"
 
             val credentialOfferHaipScheme = "haip-vci"
             val credentialOfferHaipHost = "*"
+
+            // ETSI TS 119 472-3 GEN-REQ-4.1-06
+            val credentialOfferEtsiScheme = "eu-eaa-offer"
+            val credentialOfferEtsiHost = "*"
 
             val openId4VciAuthorizationScheme = "eu.europa.ec.euidi"
             val openId4VciAuthorizationHost = "authorization"
@@ -93,8 +101,10 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                     addConfigField("MDOC_OPENID4VP_SCHEME", mdocOpenId4VpScheme)
                     addConfigField("OPENID4VP_SCHEME", openId4VpScheme)
                     addConfigField("HAIP_OPENID4VP_SCHEME", haipOpenId4VpScheme)
+                    addConfigField("ETSI_OPENID4VP_SCHEME", etsiOpenId4VpScheme)
                     addConfigField("CREDENTIAL_OFFER_SCHEME", credentialOfferScheme)
                     addConfigField("CREDENTIAL_OFFER_HAIP_SCHEME", credentialOfferHaipScheme)
+                    addConfigField("CREDENTIAL_OFFER_ETSI_SCHEME", credentialOfferEtsiScheme)
                     addConfigField("ISSUE_AUTHORIZATION_SCHEME", openId4VciAuthorizationScheme)
                     addConfigField("ISSUE_AUTHORIZATION_HOST", openId4VciAuthorizationHost)
                     addConfigField(
@@ -119,12 +129,16 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                     manifestPlaceholders["openid4vpHost"] = openid4VpHost
                     manifestPlaceholders["haipOpenid4vpScheme"] = haipOpenId4VpScheme
                     manifestPlaceholders["haipOpenid4vpHost"] = haipOpenid4VpHost
+                    manifestPlaceholders["etsiOpenid4vpScheme"] = etsiOpenId4VpScheme
+                    manifestPlaceholders["etsiOpenid4vpHost"] = etsiOpenid4VpHost
 
                     // Manifest placeholders used for OpenId4VCI
                     manifestPlaceholders["credentialOfferHost"] = credentialOfferHost
                     manifestPlaceholders["credentialOfferScheme"] = credentialOfferScheme
                     manifestPlaceholders["credentialOfferHaipHost"] = credentialOfferHaipHost
                     manifestPlaceholders["credentialOfferHaipScheme"] = credentialOfferHaipScheme
+                    manifestPlaceholders["credentialOfferEtsiHost"] = credentialOfferEtsiHost
+                    manifestPlaceholders["credentialOfferEtsiScheme"] = credentialOfferEtsiScheme
 
                     // Manifest placeholders used for OpenId4VCI Authorization
                     manifestPlaceholders["openId4VciAuthorizationScheme"] =
