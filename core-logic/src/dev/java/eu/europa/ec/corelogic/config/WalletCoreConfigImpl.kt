@@ -25,6 +25,7 @@ import eu.europa.ec.eudi.etsi1196x2.consultation.AttestationClassifications
 import eu.europa.ec.eudi.etsi1196x2.consultation.AttestationIdentifier
 import eu.europa.ec.eudi.etsi1196x2.consultation.AttestationIdentifierPredicate
 import eu.europa.ec.eudi.etsi1196x2.consultation.SupportedLists
+import eu.europa.ec.eudi.etsi1196x2.consultation.VerificationContext
 import eu.europa.ec.eudi.iso18013.transfer.response.ReaderAuthPolicy
 import eu.europa.ec.eudi.openid4vci.CredentialResponseEncryptionPolicy
 import eu.europa.ec.eudi.openid4vci.CredentialReusePolicies
@@ -41,6 +42,7 @@ import eu.europa.ec.eudi.wallet.registration.issuer.IssuerRegistrationPolicy
 import eu.europa.ec.eudi.wallet.registration.relyingparty.WrpRegistrationPolicy
 import eu.europa.ec.eudi.wallet.transfer.openId4vp.ClientIdScheme
 import eu.europa.ec.eudi.wallet.transfer.openId4vp.Format
+import eu.europa.ec.eudi.wallet.transfer.openId4vp.TransactionDataType
 import eu.europa.ec.eudi.wallet.trust.TrustPolicy
 import kotlinx.coroutines.runBlocking
 import kotlin.time.Duration.Companion.hours
@@ -91,6 +93,10 @@ internal class WalletCoreConfigImpl(
                         withFormats(
                             Format.MsoMdoc.ES256, Format.SdJwtVc.ES256
                         )
+                        withTransactionDataTypes(
+                            TransactionDataType.QES_APPROVAL,
+                            TransactionDataType.QES
+                        )
                     }
 
                     configureDCAPI {
@@ -132,7 +138,10 @@ internal class WalletCoreConfigImpl(
 
 
                     configureIssuerTrust {
-                        policy { default(TrustPolicy.Action.ENFORCE) }
+                        policy {
+                            default(TrustPolicy.Action.INFORM)
+                            forContext(VerificationContext.PID, TrustPolicy.Action.ENFORCE)
+                        }
                         requireSignedMetadata()
                         configureIssuerRegistrationPolicy(
                             if (isRegistrationCheckEnabled) {
@@ -161,6 +170,10 @@ internal class WalletCoreConfigImpl(
 
                     configureReaderTrustStore {
                         //readerAuthPolicy(ReaderAuthPolicy.EnforceIfPresent)
+                    }
+
+                    configureReaderAuthentication {
+                        //enforceIfPresent()
                     }
 
                     configureWrpRegistrationPolicy(
