@@ -195,6 +195,13 @@ internal class WalletCoreConfigImpl(
                             )
                         )
                     )
+                    .withResponseEncryptionConfig(
+                        EncryptionSupportConfig(
+                            credentialResponseEncryptionPolicy = CredentialResponseEncryptionPolicy.SUPPORTED,
+                            ecConfig = EcConfig(ecKeyCurve = Curve.P_256),
+                            rsaConfig = RsaConfig(rcaKeySize = 2048),
+                        )
+                    )
                     .build(),
                 order = 0
             ),
