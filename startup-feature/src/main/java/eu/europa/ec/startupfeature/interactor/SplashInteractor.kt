@@ -73,7 +73,8 @@ class SplashInteractorImpl(
                 } else {
                     getQuickPinConfig()
                 }
-                val route = if (prefKeys.getTrustMarkIntroductionCompleted()) {
+                // Trust Mark welcome screen disabled
+                val route = if (true || prefKeys.getTrustMarkIntroductionCompleted()) {
                     continuationRoute
                 } else {
                     val config = uiSerializer.toBase64(
