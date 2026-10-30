@@ -27,10 +27,7 @@ import eu.europa.ec.corelogic.di.WalletCoreScope
 import eu.europa.ec.corelogic.di.getOrCreateKoinScope
 import eu.europa.ec.corelogic.extension.documentIdentifier
 import eu.europa.ec.corelogic.extension.getLocalizedDisplayName
-import eu.europa.ec.corelogic.extension.parseTransactionLog
-import eu.europa.ec.corelogic.extension.toCoreTransactionLog
 import eu.europa.ec.corelogic.extension.toIssuerRegistrationDomain
-import eu.europa.ec.corelogic.extension.toTransactionLogData
 import eu.europa.ec.corelogic.extension.toUntrustedIssuerReasonOrNull
 import eu.europa.ec.corelogic.model.DeferredDocumentDataDomain
 import eu.europa.ec.corelogic.model.DocumentCategories
@@ -38,7 +35,6 @@ import eu.europa.ec.corelogic.model.DocumentIdentifier
 import eu.europa.ec.corelogic.model.FormatType
 import eu.europa.ec.corelogic.model.IssuerRegistrationDomain
 import eu.europa.ec.corelogic.model.ScopedDocumentDomain
-import eu.europa.ec.corelogic.model.TransactionLogDataDomain
 import eu.europa.ec.corelogic.model.UntrustedIssuerReasonDomain
 import eu.europa.ec.corelogic.model.isBlockedForIssuance
 import eu.europa.ec.corelogic.model.toDocumentIdentifier
@@ -68,7 +64,6 @@ import eu.europa.ec.resourceslogic.provider.ResourceProvider
 import eu.europa.ec.storagelogic.dao.BookmarkDao
 import eu.europa.ec.storagelogic.dao.FailedReIssuedDocumentDao
 import eu.europa.ec.storagelogic.dao.RevokedDocumentDao
-import eu.europa.ec.storagelogic.dao.TransactionLogDao
 import eu.europa.ec.storagelogic.model.Bookmark
 import eu.europa.ec.storagelogic.model.FailedReIssuedDocument
 import kotlinx.coroutines.CoroutineDispatcher
@@ -231,7 +226,7 @@ interface WalletCoreDocumentsController {
 
     fun issueDeferredDocument(docId: DocumentId): Flow<IssueDeferredDocumentPartialState>
 
-    fun resumeOpenId4VciWithAuthorization(uri: String)
+    fun resumeOpenId4VciWithAuthorization(uri: String): Boolean
 
     suspend fun getScopedDocuments(locale: Locale): FetchScopedDocumentsPartialState
 
@@ -242,10 +237,6 @@ interface WalletCoreDocumentsController {
     suspend fun isDocumentRevoked(id: String): Boolean
 
     suspend fun resolveDocumentStatus(document: IssuedDocument): Result<Status>
-
-    suspend fun getTransactionLogs(): List<TransactionLogDataDomain>
-
-    suspend fun getTransactionLog(id: String): TransactionLogDataDomain?
 
     suspend fun isDocumentBookmarked(documentId: DocumentId): Boolean
 
@@ -264,7 +255,6 @@ class WalletCoreDocumentsControllerImpl(
     private val resourceProvider: ResourceProvider,
     private val walletCoreConfig: WalletCoreConfig,
     private val bookmarkDao: BookmarkDao,
-    private val transactionLogDao: TransactionLogDao,
     private val revokedDocumentDao: RevokedDocumentDao,
     private val failedReIssuedDocumentDao: FailedReIssuedDocumentDao,
     private val prefKeys: PrefKeys,
@@ -273,6 +263,9 @@ class WalletCoreDocumentsControllerImpl(
 ) : WalletCoreDocumentsController {
 
     private var _eudiWallet: EudiWallet? = walletCore
+
+    @Volatile
+    private var lastAuthorizationIssuerId: String? = null
 
     private val eudiWallet: EudiWallet
         get() {
@@ -532,6 +525,10 @@ class WalletCoreDocumentsControllerImpl(
         if (preflightRefusal != null) {
             trySendBlocking(preflightRefusal)
         } else {
+            if (allowAuthorizationFallback) {
+                lastAuthorizationIssuerId = issuerId
+            }
+
             manager.reissueDocument(
                 documentId,
                 allowAuthorizationFallback,
@@ -564,6 +561,8 @@ class WalletCoreDocumentsControllerImpl(
                 useDefault = true,
                 errorMessage = documentErrorMessage
             ).getOrThrow()
+
+            lastAuthorizationIssuerId = issuerId
 
             manager.issueDocumentByOffer(
                 offer = offer,
@@ -800,38 +799,24 @@ class WalletCoreDocumentsControllerImpl(
             )
         }
 
-    override fun resumeOpenId4VciWithAuthorization(uri: String) {
-        for (manager in openId4VciManagers.values) {
-            try {
-                manager.resumeWithAuthorization(uri)
-                break
-            } catch (_: Exception) {
-            }
-        }
+    override fun resumeOpenId4VciWithAuthorization(uri: String): Boolean {
+        val issuerId = lastAuthorizationIssuerId ?: return false
+
+        return runCatching {
+            val manager = getVciManager(
+                issuerId = issuerId,
+                useDefault = true,
+                errorMessage = documentErrorMessage
+            ).getOrThrow()
+
+            manager.resumeWithAuthorization(uri)
+            true
+        }.getOrDefault(false)
     }
 
     override fun getAllDocumentCategories(): DocumentCategories {
         return walletCoreConfig.documentCategories
     }
-
-    override suspend fun getTransactionLogs(): List<TransactionLogDataDomain> =
-        withContext(dispatcher) {
-            transactionLogDao.retrieveAll()
-                .mapNotNull { transactionLog ->
-                    transactionLog
-                        .toCoreTransactionLog()
-                        ?.parseTransactionLog()
-                        ?.toTransactionLogData(transactionLog.identifier)
-                }
-        }
-
-    override suspend fun getTransactionLog(id: String): TransactionLogDataDomain? =
-        withContext(dispatcher) {
-            transactionLogDao.retrieve(id)
-                ?.toCoreTransactionLog()
-                ?.parseTransactionLog()
-                ?.toTransactionLogData(id)
-        }
 
     override suspend fun isDocumentBookmarked(documentId: DocumentId): Boolean =
         bookmarkDao.retrieve(documentId) != null
@@ -894,6 +879,8 @@ class WalletCoreDocumentsControllerImpl(
             if (preflightRefusal != null) {
                 trySendBlocking(preflightRefusal)
             } else {
+                lastAuthorizationIssuerId = issuerId
+
                 manager.issueDocumentByConfigurationIdentifiers(
                     issuerUrl = issuerId,
                     credentialConfigurationIds = configIds,

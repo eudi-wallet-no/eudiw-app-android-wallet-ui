@@ -70,6 +70,8 @@ interface FilterValidator {
 
     fun updateLists(filterableList: FilterableList)
     fun applyFilters()
+
+    /** Trims outer whitespace; blank queries clear only the search constraint. */
     fun applySearch(query: String)
     fun resetFilters()
     fun revertFilters()
@@ -422,7 +424,7 @@ class FilterValidatorImpl(
     }
 
     override fun applySearch(query: String) {
-        searchQuery = query
+        searchQuery = query.trim()
         applyFilters()
     }
 
