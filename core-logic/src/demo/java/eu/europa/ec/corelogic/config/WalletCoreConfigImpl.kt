@@ -192,9 +192,7 @@ internal class WalletCoreConfigImpl(
                 issuerUrl = VCI_ISSUER_URL,
                 config = OpenId4VciManager.Config.Builder()
                     .withClientAuthenticationType(
-                        OpenId4VciManager.ClientAuthenticationType.AttestationBased(
-                            clientId = VCI_CLIENT_ID
-                        )
+                        OpenId4VciManager.ClientAuthenticationType.None(VCI_CLIENT_ID)
                     )
                     .withAuthFlowRedirectionURI(BuildConfig.ISSUE_AUTHORIZATION_DEEPLINK)
                     .withParUsage(OpenId4VciManager.Config.ParUsage.IF_SUPPORTED)
@@ -208,6 +206,13 @@ internal class WalletCoreConfigImpl(
                             )
                         )
                     )
+                    .withResponseEncryptionConfig(
+                        EncryptionSupportConfig(
+                            credentialResponseEncryptionPolicy = CredentialResponseEncryptionPolicy.SUPPORTED,
+                            ecConfig = EcConfig(ecKeyCurve = Curve.P_256),
+                            rsaConfig = RsaConfig(rcaKeySize = 2048),
+                        )
+                    )
                     .build(),
                 order = 0
             ),
@@ -215,9 +220,7 @@ internal class WalletCoreConfigImpl(
                 issuerUrl = VCI_ISSUER_URL,
                 config = OpenId4VciManager.Config.Builder()
                     .withClientAuthenticationType(
-                        OpenId4VciManager.ClientAuthenticationType.AttestationBased(
-                            clientId = VCI_CLIENT_ID
-                        )
+                        OpenId4VciManager.ClientAuthenticationType.None(VCI_CLIENT_ID)
                     )
                     .withAuthFlowRedirectionURI(BuildConfig.ISSUE_AUTHORIZATION_DEEPLINK)
                     .withParUsage(OpenId4VciManager.Config.ParUsage.IF_SUPPORTED)
@@ -263,5 +266,5 @@ internal class WalletCoreConfigImpl(
         )
 
     override val walletProviderHost: String
-        get() = "https://utsteder.test.eidas2sandkasse.net"
+        get() = "https://dev.wallet-provider.eudiw.dev"
 }
